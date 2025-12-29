@@ -1,4 +1,6 @@
 # spec/spec_helper.rb
+ENV['RACK_ENV'] = 'test'
+
 require 'bundler/setup'
 require 'export_ms_todo'
 require 'vcr'
