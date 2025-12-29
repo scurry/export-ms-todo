@@ -21,6 +21,9 @@ RSpec/FactoryBot:
 RSpec/Rails:
   Enabled: false
 
+RSpecRails/HaveHttpStatus:
+  Enabled: false  # Not using Rails, using Sinatra with Rack::Test
+
 Capybara/RSpec/PredicateMatcher:
   Enabled: false
 

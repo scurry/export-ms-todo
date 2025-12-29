@@ -34,7 +34,7 @@ RSpec.describe 'ExportMsTodo API' do
     it 'requires token parameter' do
       get '/lists'
 
-      expect(last_response).to have_http_status(400)
+      expect(last_response.status).to eq(400)
     end
 
     it 'returns error for invalid token' do
@@ -44,7 +44,7 @@ RSpec.describe 'ExportMsTodo API' do
 
       get '/lists', token: 'invalid'
 
-      expect(last_response).to have_http_status(401)
+      expect(last_response.status).to eq(401)
     end
   end
 
@@ -52,13 +52,13 @@ RSpec.describe 'ExportMsTodo API' do
     it 'requires token parameter' do
       post '/export'
 
-      expect(last_response).to have_http_status(400)
+      expect(last_response.status).to eq(400)
     end
 
     it 'validates format parameter' do
       post '/export', token: valid_token, format: 'invalid'
 
-      expect(last_response).to have_http_status(400)
+      expect(last_response.status).to eq(400)
       expect(JSON.parse(last_response.body)['error']).to include('Invalid format')
     end
 
@@ -69,7 +69,7 @@ RSpec.describe 'ExportMsTodo API' do
 
       post '/export', token: 'invalid'
 
-      expect(last_response).to have_http_status(401)
+      expect(last_response.status).to eq(401)
     end
 
     it 'handles rate limit errors' do
@@ -79,7 +79,7 @@ RSpec.describe 'ExportMsTodo API' do
 
       post '/export', token: valid_token
 
-      expect(last_response).to have_http_status(429)
+      expect(last_response.status).to eq(429)
     end
   end
 end
