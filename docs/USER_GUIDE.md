@@ -543,7 +543,7 @@ A: No, it's read-only. Your MS Todo tasks remain untouched.
 A: Todoist CSV import has a 300-task limit. Lists with 300+ tasks are automatically split. Import all parts to the same project.
 
 **Q: Can I export to formats other than CSV?**
-A: JSON is supported for debugging (`--format json`). Other formats (TickTick, Things, etc.) planned for v2.
+A: JSON is supported for debugging (`--format json`). Other formats planned for v2.
 
 **Q: How long does export take?**
 A: Typically 10-30 seconds for a few hundred tasks. Larger collections may take 1-2 minutes.

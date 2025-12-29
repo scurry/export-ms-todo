@@ -1,0 +1,80 @@
+require:
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 3.4
+  SuggestExtensions: false
+  Exclude:
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'spec/fixtures/**/*'
+
+# Disable Capybara and FactoryBot cops (not used in this project)
+# These are loaded as dependencies of rubocop-rspec but aren't applicable
+RSpec/Capybara:
+  Enabled: false
+
+RSpec/FactoryBot:
+  Enabled: false
+
+RSpec/Rails:
+  Enabled: false
+
+Capybara/RSpec/PredicateMatcher:
+  Enabled: false
+
+# Style preferences aligned with existing codebase
+Style/StringLiterals:
+  EnforcedStyle: single_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: true
+  EnforcedStyle: always
+
+Style/Documentation:
+  Enabled: false
+
+# Metrics - reasonable limits for this codebase
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'api/app.rb'
+    - 'bin/*'
+
+Metrics/MethodLength:
+  Max: 25
+  Exclude:
+    - 'bin/*'
+
+Metrics/ClassLength:
+  Max: 150
+
+Metrics/ModuleLength:
+  Max: 150
+
+# Layout preferences
+Layout/LineLength:
+  Max: 120
+  Exclude:
+    - 'spec/**/*'
+
+# RSpec-specific
+RSpec/ExampleLength:
+  Max: 15
+
+RSpec/MultipleExpectations:
+  Max: 5
+
+RSpec/NestedGroups:
+  Max: 4
+
+# Disable overly strict cops
+Style/NumericPredicate:
+  Enabled: false
+
+Style/SymbolArray:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false

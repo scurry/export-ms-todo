@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/export_ms_todo/task_repository.rb
 require 'json'
 require_relative 'task'
@@ -18,10 +20,10 @@ module ExportMsTodo
           checklist = fetch_checklist_items(list['id'], task_data['id'])
 
           Task.new(task_data.merge(
-            'checklistItems' => checklist,
-            'listName' => list['displayName'],
-            'listId' => list['id']
-          ))
+                     'checklistItems' => checklist,
+                     'listName' => list['displayName'],
+                     'listId' => list['id']
+                   ))
         end
 
         { list: list, tasks: tasks }
@@ -30,7 +32,7 @@ module ExportMsTodo
 
     def fetch_lists
       fetch_collection('/me/todo/lists').select do |list|
-        ['none', 'defaultList'].include?(list['wellknownListName'])
+        %w[none defaultList].include?(list['wellknownListName'])
       end
     end
 
@@ -49,8 +51,8 @@ module ExportMsTodo
     end
 
     def fetch_tasks_for_list(list_id)
-      fetch_collection("/me/todo/lists/#{list_id}/tasks").select do |t|
-        t['status'] != 'completed'
+      fetch_collection("/me/todo/lists/#{list_id}/tasks").reject do |t|
+        t['status'] == 'completed'
       end
     end
 

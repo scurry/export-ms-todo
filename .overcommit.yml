@@ -1,0 +1,52 @@
+# Overcommit hooks configuration
+# See https://github.com/sds/overcommit for details
+
+PreCommit:
+  RuboCop:
+    enabled: true
+    on_warn: pass  # Only fail on errors, not warnings
+    command: ['bundle', 'exec', 'rubocop']
+
+  BundleAudit:
+    enabled: true
+    description: 'Check for vulnerable dependencies'
+    required_executable: 'bundle-audit'
+    command: ['bundle', 'exec', 'bundle-audit', 'check', '--update']
+
+  BundleCheck:
+    enabled: true
+    description: 'Check Gemfile dependencies'
+
+  HardTabs:
+    enabled: true
+    exclude:
+      - '**/Makefile'
+      - '**/.git*'
+
+  # Secret detection
+  KeywordsInFile:
+    enabled: true
+    description: 'Check for potential secrets'
+    keywords:
+      - 'eyJ'  # JWT tokens (like MS Graph tokens)
+      - 'AKIA'  # AWS access keys
+      - 'api_key'
+      - 'apikey'
+      - 'secret_key'
+      - 'private_key'
+      - 'token'
+      - 'password'
+      - 'MS_TODO_TOKEN'
+    exclude:
+      - '**/.env.example'  # Allow examples
+      - '**/README.md'     # Documentation
+      - '**/docs/**/*'     # Documentation
+      - '**/*.md'          # All markdown
+
+PrePush:
+  RSpec:
+    enabled: true
+    description: 'Run RSpec test suite'
+    command: ['bundle', 'exec', 'rspec']
+
+# Skip hooks with: git commit --no-verify

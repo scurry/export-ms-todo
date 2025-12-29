@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/export_ms_todo/config_spec.rb
 require 'spec_helper'
 require 'export_ms_todo/config'

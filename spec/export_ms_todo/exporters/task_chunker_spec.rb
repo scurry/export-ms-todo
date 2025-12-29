@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/export_ms_todo/exporters/task_chunker_spec.rb
 require 'spec_helper'
 require 'export_ms_todo/exporters/task_chunker'
@@ -11,10 +13,10 @@ RSpec.describe ExportMsTodo::Exporters::TaskChunker do
   def build_task(title, subtask_count = 0)
     checklist = Array.new(subtask_count) { { 'displayName' => 'Subtask' } }
     ExportMsTodo::Task.new({
-      'title' => title,
-      'checklistItems' => checklist,
-      'listName' => 'Large Project'
-    })
+                             'title' => title,
+                             'checklistItems' => checklist,
+                             'listName' => 'Large Project'
+                           })
   end
 
   describe '#export' do
@@ -34,7 +36,7 @@ RSpec.describe ExportMsTodo::Exporters::TaskChunker do
     it 'keeps parent task and subtasks together' do
       # 280 simple tasks + 1 task with 50 subtasks = 331 total
       simple_tasks = Array.new(280) { build_task('Simple') }
-      complex_task = build_task('Complex', 50)  # 1 + 50 = 51 rows
+      complex_task = build_task('Complex', 50) # 1 + 50 = 51 rows
 
       tasks = simple_tasks + [complex_task]
       chunker = described_class.new(list, tasks, exporter)
@@ -60,7 +62,7 @@ RSpec.describe ExportMsTodo::Exporters::TaskChunker do
       expect { chunker.export }.to output(/exceeds 300 limit/).to_stderr
 
       result = chunker.export
-      expect(result.size).to eq(1)  # One chunk with 351 rows
+      expect(result.size).to eq(1) # One chunk with 351 rows
     end
 
     it 'generates valid CSV content for each chunk' do

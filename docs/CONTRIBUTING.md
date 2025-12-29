@@ -139,6 +139,10 @@ git remote add upstream https://github.com/scurry/export-ms-todo.git
 # Install dependencies
 bundle install
 
+# Set up code quality hooks
+bundle exec overcommit --install
+bundle exec overcommit --sign
+
 # Set up environment
 cp .env.example .env
 # Edit .env and add your token
@@ -147,6 +151,10 @@ cp .env.example .env
 bundle exec rspec
 bundle exec bin/export-ms-todo version
 ```
+
+**Code quality tools:**
+- Pre-commit hooks run RuboCop and security checks automatically
+- See **[Code Quality Tools](DEVELOPER_GUIDE.md#code-quality-tools)** for details
 
 ### Keeping Your Fork Updated
 

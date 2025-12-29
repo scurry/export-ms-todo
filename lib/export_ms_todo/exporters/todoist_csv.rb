@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/export_ms_todo/exporters/todoist_csv.rb
 require 'csv'
 require_relative 'task_chunker'
@@ -9,9 +11,9 @@ module ExportMsTodo
     class TodoistCSV
       MAX_TASKS_PER_FILE = 300
 
-      TODOIST_HEADERS = [
-        'TYPE', 'CONTENT', 'DESCRIPTION', 'PRIORITY', 'INDENT',
-        'AUTHOR', 'RESPONSIBLE', 'DATE', 'DATE_LANG', 'TIMEZONE'
+      TODOIST_HEADERS = %w[
+        TYPE CONTENT DESCRIPTION PRIORITY INDENT
+        AUTHOR RESPONSIBLE DATE DATE_LANG TIMEZONE
       ].freeze
 
       def export(grouped_tasks)
@@ -29,7 +31,7 @@ module ExportMsTodo
         end
       end
 
-      def generate_csv(list, tasks)
+      def generate_csv(_list, tasks)
         CSV.generate(headers: true, write_headers: true) do |csv|
           csv << TODOIST_HEADERS
 
@@ -55,10 +57,10 @@ module ExportMsTodo
       def add_task_rows(csv, task)
         # Determine DATE field - recurrence takes precedence over one-time due date
         date_value = if task.recurrence
-          RecurrenceMapper.new.map(task.recurrence)
-        else
-          task.due_date || ''
-        end
+                       RecurrenceMapper.new.map(task.recurrence)
+                     else
+                       task.due_date || ''
+                     end
 
         # Parent task
         csv << [

@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
+
 # bin/export-ms-todo
 
 require 'bundler/setup'
@@ -22,7 +24,7 @@ module ExportMsTodo
 
     desc 'export', 'Export MS Todo tasks to Todoist CSV format'
     option :output, aliases: '-o', desc: 'Output path (default: ./ms-todo-export)'
-    option :format, aliases: '-f', enum: ['csv', 'json'], default: 'csv', desc: 'Output format'
+    option :format, aliases: '-f', enum: %w[csv json], default: 'csv', desc: 'Output format'
     option :single_file, type: :boolean, default: false, desc: 'Export all lists to single file'
     option :token, aliases: '-t', desc: 'MS Graph access token'
     def export
@@ -31,32 +33,32 @@ module ExportMsTodo
         exit 130
       end
 
-      say "╭─────────────────────────────────────────╮", :blue
-      say "│  Export MS Todo → Todoist              │", :blue
-      say "╰─────────────────────────────────────────╯", :blue
+      say '╭─────────────────────────────────────────╮', :blue
+      say '│  Export MS Todo → Todoist              │', :blue
+      say '╰─────────────────────────────────────────╯', :blue
       say
 
       # Get configuration
       config = Config.new(overrides: {
-        output_path: options[:output],
-        output_format: options[:format],
-        single_file: options[:single_file],
-        token: options[:token]
-      })
+                            output_path: options[:output],
+                            output_format: options[:format],
+                            single_file: options[:single_file],
+                            token: options[:token]
+                          })
 
       token = config.token || prompt_for_token
 
       client = GraphClient.new(token)
       repo = TaskRepository.new(client)
 
-      say "✓ Authenticated successfully", :green
-      say "✓ Fetching tasks...", :green
+      say '✓ Authenticated successfully', :green
+      say '✓ Fetching tasks...', :green
 
       # Fetch tasks
       grouped_tasks = repo.fetch_all_tasks
 
       if grouped_tasks.empty?
-        say "No lists found.", :yellow
+        say 'No lists found.', :yellow
         exit 0
       end
 
@@ -70,8 +72,11 @@ module ExportMsTodo
       say "\nGenerating #{config.output_format.upcase} files...", :green
 
       # Export
-      exporter = config.output_format == 'json' ?
-        Exporters::JSON.new : Exporters::TodoistCSV.new
+      exporter = if config.output_format == 'json'
+                   Exporters::JSON.new
+                 else
+                   Exporters::TodoistCSV.new
+                 end
 
       files = exporter.export(grouped_tasks)
 
@@ -89,7 +94,7 @@ module ExportMsTodo
         output_path += '.zip' unless output_path.end_with?('.zip')
 
         create_file(output_path) do # Thor's create_file
-           create_zip_content(files)
+          create_zip_content(files)
         end
       end
 
@@ -108,18 +113,18 @@ module ExportMsTodo
       end
 
       say "\nNext steps:"
-      say "1. Go to Todoist → Settings → Import"
-      say "2. Upload CSV files (numbered files to same project)"
+      say '1. Go to Todoist → Settings → Import'
+      say '2. Upload CSV files (numbered files to same project)'
     rescue AuthenticationError => e
       say "\n✗ Authentication failed", :red
       say "  #{e.message}"
-      say "  Get a new token: https://developer.microsoft.com/en-us/graph/graph-explorer"
+      say '  Get a new token: https://developer.microsoft.com/en-us/graph/graph-explorer'
       exit 1
     rescue RateLimitError => e
       say "\n✗ Rate limit exceeded", :red
       say "  #{e.message}"
       exit 1
-    rescue => e
+    rescue StandardError => e
       say "\n✗ Error: #{e.message}", :red
       say e.backtrace.first(5).join("\n") if ENV['DEBUG']
       exit 1
@@ -133,14 +138,14 @@ module ExportMsTodo
     private
 
     def prompt_for_token
-      say "No token found. Please enter your MS Graph access token:"
-      say "(Get it from: https://developer.microsoft.com/en-us/graph/graph-explorer)"
+      say 'No token found. Please enter your MS Graph access token:'
+      say '(Get it from: https://developer.microsoft.com/en-us/graph/graph-explorer)'
       say
 
-      token = ask("Token:", :echo => false)
-      say "" # Newline after silent input
+      token = ask('Token:', echo: false)
+      say '' # Newline after silent input
 
-      token.empty? ? (raise Error, "Token required") : token
+      token.empty? ? (raise Error, 'Token required') : token
     end
 
     def create_zip_content(files)

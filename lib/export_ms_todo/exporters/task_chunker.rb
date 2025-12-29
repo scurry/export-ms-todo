@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/export_ms_todo/exporters/task_chunker.rb
 require_relative '../utils'
 

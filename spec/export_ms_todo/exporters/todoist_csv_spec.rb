@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/export_ms_todo/exporters/todoist_csv_spec.rb
 require 'spec_helper'
 require 'export_ms_todo/exporters/todoist_csv'
@@ -52,7 +54,7 @@ RSpec.describe ExportMsTodo::Exporters::TodoistCSV do
       expect(row['TYPE']).to eq('task')
       expect(row['CONTENT']).to eq('Review PR')
       expect(row['DESCRIPTION']).to eq('Check the authentication changes')
-      expect(row['PRIORITY']).to eq('1')  # high importance
+      expect(row['PRIORITY']).to eq('1') # high importance
       expect(row['INDENT']).to eq('1')
       expect(row['DATE']).to eq('2025-01-20T10:00:00')
       expect(row['TIMEZONE']).to eq('America/New_York')
@@ -69,7 +71,7 @@ RSpec.describe ExportMsTodo::Exporters::TodoistCSV do
       result = exporter.export(grouped_tasks)
       csv = CSV.parse(result.first[:content], headers: true)
 
-      expect(csv.size).to eq(3)  # 1 parent + 2 subtasks
+      expect(csv.size).to eq(3) # 1 parent + 2 subtasks
 
       # Parent task
       expect(csv[0]['CONTENT']).to eq('Review PR')
@@ -153,7 +155,7 @@ RSpec.describe ExportMsTodo::Exporters::TodoistCSV do
           'pattern' => {
             'type' => 'weekly',
             'interval' => 2,
-            'daysOfWeek' => ['monday', 'wednesday']
+            'daysOfWeek' => %w[monday wednesday]
           }
         }
         task = ExportMsTodo::Task.new(task_data)

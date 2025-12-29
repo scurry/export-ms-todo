@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/export_ms_todo/recurrence_mapper.rb
 module ExportMsTodo
   class RecurrenceMapper
@@ -44,6 +46,7 @@ module ExportMsTodo
       if days_of_week.any?
         days = days_of_week.map(&:capitalize).join(' and ')
         return "every #{days}" if interval == 1
+
         return "#{base} on #{days}"
       end
 
@@ -56,6 +59,7 @@ module ExportMsTodo
       # Last day of month heuristic (28-31)
       if day >= 28
         return 'every month on the last day' if interval == 1
+
         return "every #{interval} months on the last day"
       end
 
@@ -63,11 +67,12 @@ module ExportMsTodo
     end
 
     def map_relativeMonthly
-      index = pattern['index']  # first, second, third, fourth, last
+      index = pattern['index'] # first, second, third, fourth, last
 
       # "Last day of month" (no specific day of week)
       if index == 'last' && days_of_week.empty?
         return 'every month on the last day' if interval == 1
+
         return "every #{interval} months on the last day"
       end
 

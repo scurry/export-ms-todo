@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/export_ms_todo/config.rb
 require 'yaml'
 
@@ -54,8 +56,9 @@ module ExportMsTodo
 
     def load_yaml(path)
       return {} unless File.exist?(path)
+
       YAML.load_file(path) || {}
-    rescue => e
+    rescue StandardError => e
       warn "Failed to load config from #{path}: #{e.message}"
       {}
     end

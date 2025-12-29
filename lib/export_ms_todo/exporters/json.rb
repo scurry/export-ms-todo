@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/export_ms_todo/exporters/json.rb
 require 'json'
 require_relative '../utils'

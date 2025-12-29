@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/export_ms_todo.rb
 require_relative 'export_ms_todo/version'
 require_relative 'export_ms_todo/utils'

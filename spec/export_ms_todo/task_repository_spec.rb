@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/export_ms_todo/task_repository_spec.rb
 require 'spec_helper'
 require 'export_ms_todo/task_repository'
@@ -27,7 +29,7 @@ RSpec.describe ExportMsTodo::TaskRepository do
     before do
       allow(client).to receive(:get).with('/me/todo/lists').and_return(list_response)
       allow(client).to receive(:get).with('/me/todo/lists/list1/tasks').and_return(tasks_response)
-      allow(client).to receive(:get).with(/\/checklistItems$/).and_return(checklist_response)
+      allow(client).to receive(:get).with(%r{/checklistItems$}).and_return(checklist_response)
     end
 
     it 'fetches lists and tasks' do

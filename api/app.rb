@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # api/app.rb
 require 'dotenv/load' if ENV['RACK_ENV'] != 'production'
 require 'sinatra/base'
@@ -40,7 +42,7 @@ module ExportMsTodo
       halt 401, { error: e.message }.to_json
     rescue RateLimitError => e
       halt 429, { error: e.message }.to_json
-    rescue => e
+    rescue StandardError => e
       halt 500, { error: e.message }.to_json
     end
 
@@ -50,9 +52,9 @@ module ExportMsTodo
       halt 400, { error: 'Token required' }.to_json unless token
 
       format = params[:format] || 'csv'
-      halt 400, { error: 'Invalid format' }.to_json unless ['csv', 'json'].include?(format)
+      halt 400, { error: 'Invalid format' }.to_json unless %w[csv json].include?(format)
 
-      single_file = params[:single_file] == 'true' || params[:single_file] == true
+      single_file = ['true', true].include?(params[:single_file])
 
       # Fetch tasks
       client = GraphClient.new(token)
@@ -60,8 +62,11 @@ module ExportMsTodo
       grouped_tasks = repo.fetch_all_tasks
 
       # Export
-      exporter = format == 'json' ?
-        Exporters::JSON.new : Exporters::TodoistCSV.new
+      exporter = if format == 'json'
+                   Exporters::JSON.new
+                 else
+                   Exporters::TodoistCSV.new
+                 end
 
       files = exporter.export(grouped_tasks)
 
@@ -83,7 +88,7 @@ module ExportMsTodo
       halt 401, { error: e.message }.to_json
     rescue RateLimitError => e
       halt 429, { error: e.message }.to_json
-    rescue => e
+    rescue StandardError => e
       halt 500, { error: e.message }.to_json
     end
 

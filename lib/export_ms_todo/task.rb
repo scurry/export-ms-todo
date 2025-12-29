@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/export_ms_todo/task.rb
 module ExportMsTodo
   class Task
@@ -17,11 +19,11 @@ module ExportMsTodo
       @title = data['title']
 
       # Handle both body formats: {'content' => 'text'} and 'text'
-      if data['body'].is_a?(Hash)
-        @body = data['body']['content']
-      else
-        @body = data['body']
-      end
+      @body = if data['body'].is_a?(Hash)
+                data['body']['content']
+              else
+                data['body']
+              end
 
       @importance = data['importance']
       @status = data['status']

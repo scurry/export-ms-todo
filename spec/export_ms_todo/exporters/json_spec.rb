@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/export_ms_todo/exporters/json_spec.rb
 require 'spec_helper'
 require 'export_ms_todo/exporters/json'
@@ -10,15 +12,15 @@ RSpec.describe ExportMsTodo::Exporters::JSON do
   let(:list) { { 'id' => 'list1', 'displayName' => 'Work' } }
   let(:task) do
     ExportMsTodo::Task.new({
-      'id' => 'task1',
-      'title' => 'Review PR',
-      'body' => 'Check authentication',
-      'importance' => 'high',
-      'checklistItems' => [
-        { 'displayName' => 'Check tests' }
-      ],
-      'listName' => 'Work'
-    })
+                             'id' => 'task1',
+                             'title' => 'Review PR',
+                             'body' => 'Check authentication',
+                             'importance' => 'high',
+                             'checklistItems' => [
+                               { 'displayName' => 'Check tests' }
+                             ],
+                             'listName' => 'Work'
+                           })
   end
   let(:grouped_tasks) { [{ list: list, tasks: [task] }] }
 

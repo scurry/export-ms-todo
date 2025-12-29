@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # lib/export_ms_todo/graph_client.rb
 require 'httparty'
 require 'time'
@@ -30,20 +32,18 @@ module ExportMsTodo
         raise AuthenticationError, 'Invalid or expired token'
       when 429
         retry_after = parse_retry_after(response.headers['Retry-After'])
-        if retries > 0
-          warn "Rate limit exceeded. Waiting #{retry_after} seconds..."
-          sleep(retry_after)
-          get_with_retry(path, retries - 1)
-        else
-          raise RateLimitError, "Rate limit exceeded. Retry after #{retry_after} seconds"
-        end
+        raise RateLimitError, "Rate limit exceeded. Retry after #{retry_after} seconds" unless retries.positive?
+
+        warn "Rate limit exceeded. Waiting #{retry_after} seconds..."
+        sleep(retry_after)
+        get_with_retry(path, retries - 1)
+
       when 500..599
-        if retries > 0
-          sleep(2 ** (MAX_RETRIES - retries))  # Exponential backoff
-          get_with_retry(path, retries - 1)
-        else
-          raise Error, "Server error: #{response.code}"
-        end
+        raise Error, "Server error: #{response.code}" unless retries.positive?
+
+        sleep(2**(MAX_RETRIES - retries)) # Exponential backoff
+        get_with_retry(path, retries - 1)
+
       else
         raise Error, "Unexpected response: #{response.code}"
       end
@@ -58,7 +58,7 @@ module ExportMsTodo
         # Handle HTTP Date format
         (Time.httpdate(header_val) - Time.now).to_i
       end
-    rescue
+    rescue StandardError
       60 # Fallback default
     end
   end

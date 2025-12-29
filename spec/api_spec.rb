@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/api_spec.rb
 require 'spec_helper'
 require 'rack/test'
@@ -22,9 +24,9 @@ RSpec.describe 'ExportMsTodo API' do
 
       expect(last_response).to be_ok
       expect(JSON.parse(last_response.body)).to eq({
-        'status' => 'ok',
-        'version' => ExportMsTodo::VERSION
-      })
+                                                     'status' => 'ok',
+                                                     'version' => ExportMsTodo::VERSION
+                                                   })
     end
   end
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/export_ms_todo/recurrence_mapper_spec.rb
 require 'spec_helper'
 require 'export_ms_todo/recurrence_mapper'
@@ -34,7 +36,7 @@ RSpec.describe ExportMsTodo::RecurrenceMapper do
           'pattern' => {
             'type' => 'weekly',
             'interval' => 1,
-            'daysOfWeek' => ['monday', 'wednesday', 'friday']
+            'daysOfWeek' => %w[monday wednesday friday]
           }
         }
         expect(mapper.map(recurrence)).to eq('every Monday and Wednesday and Friday')

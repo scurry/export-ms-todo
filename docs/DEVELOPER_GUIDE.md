@@ -134,6 +134,53 @@ bundle exec rspec
 git worktree remove .worktrees/my-feature
 ```
 
+### Code Quality Tools
+
+The project uses automated quality checks to maintain code standards:
+
+**Setup (one-time):**
+```bash
+# Install hooks
+bundle exec overcommit --install
+
+# Sign the configuration
+bundle exec overcommit --sign
+```
+
+**Tools:**
+- **RuboCop** - Style and quality linter
+- **RuboCop RSpec** - RSpec-specific cops
+- **Bundler Audit** - Security vulnerability scanner
+- **Overcommit** - Git hooks manager
+
+**Automated checks:**
+- **Pre-commit:** RuboCop (staged files only), Bundler Audit
+- **Pre-push:** Full RSpec test suite
+
+**Manual commands:**
+```bash
+# Run all quality checks
+bundle exec rake quality
+
+# Run tests only
+bundle exec rake test
+
+# Run linter
+bundle exec rake lint
+
+# Auto-fix linter issues
+bundle exec rake lint:fix
+
+# Security audit
+bundle exec rake audit
+```
+
+**Bypass hooks (use sparingly):**
+```bash
+git commit --no-verify
+git push --no-verify
+```
+
 ---
 
 ## Project Structure

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # spec/integration/export_flow_spec.rb
 require 'spec_helper'
 require 'export_ms_todo'
@@ -86,7 +88,7 @@ RSpec.describe 'Full export flow', :integration do
 
       # First task (with subtasks)
       expect(csv[0]['CONTENT']).to eq('Complete project')
-      expect(csv[0]['PRIORITY']).to eq('1')  # high
+      expect(csv[0]['PRIORITY']).to eq('1') # high
       expect(csv[0]['DATE']).to eq('2025-01-15T10:00:00')
       expect(csv[0]['INDENT']).to eq('1')
 
@@ -99,7 +101,7 @@ RSpec.describe 'Full export flow', :integration do
       # Recurring task
       expect(csv[3]['CONTENT']).to eq('Weekly standup')
       expect(csv[3]['DATE']).to eq('every Monday')
-      expect(csv[3]['PRIORITY']).to eq('4')  # normal
+      expect(csv[3]['PRIORITY']).to eq('4') # normal
     end
   end
 
@@ -158,9 +160,9 @@ RSpec.describe 'Full export flow', :integration do
 
       repo = ExportMsTodo::TaskRepository.new(client)
 
-      expect {
+      expect do
         repo.fetch_all_tasks
-      }.to raise_error(ExportMsTodo::AuthenticationError, 'Invalid token')
+      end.to raise_error(ExportMsTodo::AuthenticationError, 'Invalid token')
     end
 
     it 'handles rate limit errors gracefully' do
@@ -169,9 +171,9 @@ RSpec.describe 'Full export flow', :integration do
 
       repo = ExportMsTodo::TaskRepository.new(client)
 
-      expect {
+      expect do
         repo.fetch_all_tasks
-      }.to raise_error(ExportMsTodo::RateLimitError, 'Rate limited')
+      end.to raise_error(ExportMsTodo::RateLimitError, 'Rate limited')
     end
   end
 end
