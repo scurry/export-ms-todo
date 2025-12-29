@@ -32,7 +32,7 @@ module ExportMsTodo
       end
 
       def generate_csv(_list, tasks)
-        CSV.generate(headers: true, write_headers: true) do |csv|
+        CSV.generate(headers: true, write_headers: true, force_quotes: true) do |csv|
           csv << TODOIST_HEADERS
 
           tasks.each do |task|
