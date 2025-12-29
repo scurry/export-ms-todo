@@ -1,0 +1,158 @@
+#!/usr/bin/env ruby
+# bin/export-ms-todo
+
+require 'bundler/setup'
+require 'thor'
+require 'dotenv/load'
+require 'zip'
+require_relative '../lib/export_ms_todo'
+require_relative '../lib/export_ms_todo/graph_client'
+require_relative '../lib/export_ms_todo/task_repository'
+require_relative '../lib/export_ms_todo/config'
+require_relative '../lib/export_ms_todo/exporters/todoist_csv'
+require_relative '../lib/export_ms_todo/exporters/json'
+
+module ExportMsTodo
+  class CLI < Thor
+    include Thor::Actions
+
+    def self.exit_on_failure?
+      true
+    end
+
+    desc 'export', 'Export MS Todo tasks to Todoist CSV format'
+    option :output, aliases: '-o', desc: 'Output path (default: ./ms-todo-export)'
+    option :format, aliases: '-f', enum: ['csv', 'json'], default: 'csv', desc: 'Output format'
+    option :single_file, type: :boolean, default: false, desc: 'Export all lists to single file'
+    option :token, aliases: '-t', desc: 'MS Graph access token'
+    def export
+      trap('SIGINT') do
+        say "\n\n❌ Export cancelled by user.", :red
+        exit 130
+      end
+
+      say "╭─────────────────────────────────────────╮", :blue
+      say "│  Export MS Todo → Todoist              │", :blue
+      say "╰─────────────────────────────────────────╯", :blue
+      say
+
+      # Get configuration
+      config = Config.new(overrides: {
+        output_path: options[:output],
+        output_format: options[:format],
+        single_file: options[:single_file],
+        token: options[:token]
+      })
+
+      token = config.token || prompt_for_token
+
+      client = GraphClient.new(token)
+      repo = TaskRepository.new(client)
+
+      say "✓ Authenticated successfully", :green
+      say "✓ Fetching tasks...", :green
+
+      # Fetch tasks
+      grouped_tasks = repo.fetch_all_tasks
+
+      if grouped_tasks.empty?
+        say "No lists found.", :yellow
+        exit 0
+      end
+
+      # Display summary
+      grouped_tasks.each do |group|
+        list_name = group[:list]['displayName']
+        task_count = group[:tasks].sum(&:total_task_count)
+        say "  → #{list_name}: #{task_count} tasks"
+      end
+
+      say "\nGenerating #{config.output_format.upcase} files...", :green
+
+      # Export
+      exporter = config.output_format == 'json' ?
+        Exporters::JSON.new : Exporters::TodoistCSV.new
+
+      files = exporter.export(grouped_tasks)
+
+      # Write files
+      if config.single_file || files.size == 1
+        # Single file output
+        file = files.first
+        output_path = config.output_path
+        output_path += ".#{config.output_format}" unless output_path.end_with?(".#{config.output_format}")
+
+        create_file(output_path, file[:content])
+      else
+        # Multiple files - create ZIP
+        output_path = config.output_path
+        output_path += '.zip' unless output_path.end_with?('.zip')
+
+        create_file(output_path) do # Thor's create_file
+           create_zip_content(files)
+        end
+      end
+
+      say "\nExport complete!", :green
+      say "📦 #{File.basename(output_path)}"
+
+      # Show chunked file warnings
+      chunked_lists = files.select { |f| f[:total_parts] && f[:total_parts] > 1 }
+                           .group_by { |f| f[:filename].gsub(/-\d+\.csv$/, '') }
+
+      if chunked_lists.any?
+        say "\n⚠️  Note: Some lists were split due to 300-task limit:", :yellow
+        chunked_lists.each do |base_name, parts|
+          say "   - #{base_name}: Import #{parts.size} files to same project"
+        end
+      end
+
+      say "\nNext steps:"
+      say "1. Go to Todoist → Settings → Import"
+      say "2. Upload CSV files (numbered files to same project)"
+    rescue AuthenticationError => e
+      say "\n✗ Authentication failed", :red
+      say "  #{e.message}"
+      say "  Get a new token: https://developer.microsoft.com/en-us/graph/graph-explorer"
+      exit 1
+    rescue RateLimitError => e
+      say "\n✗ Rate limit exceeded", :red
+      say "  #{e.message}"
+      exit 1
+    rescue => e
+      say "\n✗ Error: #{e.message}", :red
+      say e.backtrace.first(5).join("\n") if ENV['DEBUG']
+      exit 1
+    end
+
+    desc 'version', 'Display version'
+    def version
+      say "export-ms-todo v#{VERSION}"
+    end
+
+    private
+
+    def prompt_for_token
+      say "No token found. Please enter your MS Graph access token:"
+      say "(Get it from: https://developer.microsoft.com/en-us/graph/graph-explorer)"
+      say
+
+      token = ask("Token:", :echo => false)
+      say "" # Newline after silent input
+
+      token.empty? ? (raise Error, "Token required") : token
+    end
+
+    def create_zip_content(files)
+      Zip::OutputStream.write_buffer do |zip|
+        files.each do |file|
+          zip.put_next_entry(file[:filename])
+          zip.write file[:content]
+        end
+      end.string
+    end
+  end
+end
+
+# Run CLI if executed directly
+ExportMsTodo::CLI.start(ARGV) if __FILE__ == $PROGRAM_NAME
