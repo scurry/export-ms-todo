@@ -134,6 +134,53 @@ RSpec.describe ExportMsTodo::Exporters::TodoistCSV do
       expect(result[0][:filename]).to eq('Work-1.csv')
       expect(result[1][:filename]).to eq('Work-2.csv')
     end
+
+    describe 'recurrence patterns' do
+      it 'maps recurrence to DATE field' do
+        task_data['recurrence'] = {
+          'pattern' => { 'type' => 'daily', 'interval' => 1 }
+        }
+        task = ExportMsTodo::Task.new(task_data)
+
+        result = exporter.export([{ list: list, tasks: [task] }])
+        csv = CSV.parse(result.first[:content], headers: true)
+
+        expect(csv.first['DATE']).to eq('every day')
+      end
+
+      it 'handles complex recurrence patterns' do
+        task_data['recurrence'] = {
+          'pattern' => {
+            'type' => 'weekly',
+            'interval' => 2,
+            'daysOfWeek' => ['monday', 'wednesday']
+          }
+        }
+        task = ExportMsTodo::Task.new(task_data)
+
+        result = exporter.export([{ list: list, tasks: [task] }])
+        csv = CSV.parse(result.first[:content], headers: true)
+
+        expect(csv.first['DATE']).to eq('every 2 weeks on Monday and Wednesday')
+      end
+
+      it 'prefers recurrence over due date' do
+        task_data['dueDateTime'] = {
+          'dateTime' => '2025-01-20T10:00:00',
+          'timeZone' => 'America/New_York'
+        }
+        task_data['recurrence'] = {
+          'pattern' => { 'type' => 'weekly', 'interval' => 1 }
+        }
+        task = ExportMsTodo::Task.new(task_data)
+
+        result = exporter.export([{ list: list, tasks: [task] }])
+        csv = CSV.parse(result.first[:content], headers: true)
+
+        # Recurrence should override one-time due date
+        expect(csv.first['DATE']).to eq('every week')
+      end
+    end
   end
 
   describe '#sanitize_filename' do

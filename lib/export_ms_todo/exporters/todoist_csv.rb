@@ -2,6 +2,7 @@
 require 'csv'
 require_relative 'task_chunker'
 require_relative '../utils'
+require_relative '../recurrence_mapper'
 
 module ExportMsTodo
   module Exporters
@@ -52,6 +53,13 @@ module ExportMsTodo
       end
 
       def add_task_rows(csv, task)
+        # Determine DATE field - recurrence takes precedence over one-time due date
+        date_value = if task.recurrence
+          RecurrenceMapper.new.map(task.recurrence)
+        else
+          task.due_date || ''
+        end
+
         # Parent task
         csv << [
           'task',                          # TYPE
@@ -61,7 +69,7 @@ module ExportMsTodo
           1,                               # INDENT (parent)
           '',                              # AUTHOR
           '',                              # RESPONSIBLE
-          task.due_date || '',             # DATE
+          date_value,                      # DATE
           'en',                            # DATE_LANG
           task.due_timezone || ''          # TIMEZONE
         ]
