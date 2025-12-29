@@ -15,7 +15,14 @@ module ExportMsTodo
     def initialize(data)
       @id = data['id']
       @title = data['title']
-      @body = data.dig('body', 'content') || data['body']
+
+      # Handle both body formats: {'content' => 'text'} and 'text'
+      if data['body'].is_a?(Hash)
+        @body = data['body']['content']
+      else
+        @body = data['body']
+      end
+
       @importance = data['importance']
       @status = data['status']
       @recurrence = data['recurrence']
