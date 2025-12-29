@@ -120,14 +120,12 @@ See [Development Setup](#development-setup) and [Contribution Process](#contribu
 
 ## Development Setup
 
-### Prerequisites
+See **[Development Setup](DEVELOPER_GUIDE.md#development-setup)** in the Developer Guide for detailed setup instructions including:
+- Prerequisites (Ruby, Bundler, MS Graph token)
+- Initial setup steps
+- Development workflow with worktrees
 
-- **Ruby 3.2+** - [Installation guide](https://www.ruby-lang.org/en/documentation/installation/)
-- **Bundler** - `gem install bundler`
-- **Git** - For version control
-- **MS Graph Token** - For testing ([Get it here](https://developer.microsoft.com/en-us/graph/graph-explorer))
-
-### Initial Setup
+### Fork Setup (External Contributors)
 
 ```bash
 # Fork the repository on GitHub
@@ -143,26 +141,20 @@ bundle install
 
 # Set up environment
 cp .env.example .env
-# Edit .env and add your test token
+# Edit .env and add your token
 
-# Run tests to verify setup
+# Verify setup
 bundle exec rspec
-
-# Run CLI to verify
 bundle exec bin/export-ms-todo version
 ```
 
 ### Keeping Your Fork Updated
 
 ```bash
-# Fetch upstream changes
+# Fetch and merge upstream changes
 git fetch upstream
-
-# Merge into your main branch
 git checkout main
 git merge upstream/main
-
-# Push to your fork
 git push origin main
 ```
 
@@ -183,19 +175,21 @@ git push origin main
 git checkout main
 git pull upstream main
 
-# Create feature branch from main
+# Create feature branch
 git checkout -b feature/add-categories-support
 
 # Or bugfix branch
 git checkout -b fix/csv-escaping-quotes
 ```
 
-**Branch naming:**
+**Branch naming conventions:**
 - `feature/` - New features
 - `fix/` - Bug fixes
 - `docs/` - Documentation
 - `test/` - Test improvements
 - `refactor/` - Code refactoring
+
+**Advanced:** See **[Development Workflow](DEVELOPER_GUIDE.md#development-workflow-for-coding-agents-eg-claude-with-worktrees)** in the Developer Guide for git worktree workflow.
 
 ### 3. Make Your Changes
 
@@ -314,164 +308,45 @@ Fixes #123 (link to issue)
 
 ## Coding Guidelines
 
-### Ruby Style
+See **[Code Style](DEVELOPER_GUIDE.md#code-style)** in the Developer Guide for detailed guidelines on:
+- Ruby style conventions (indentation, naming, etc.)
+- Design principles (KISS, DRY, SOLID)
+- Error handling patterns
+- Dependency injection
 
-Follow standard Ruby conventions:
-
-```ruby
-# Good
-def export_tasks(grouped_tasks)
-  grouped_tasks.map do |group|
-    process_group(group)
-  end
-end
-
-# Bad
-def exportTasks(groupedTasks)
-  groupedTasks.map{|group|process_group(group)}
-end
-```
-
-**Key points:**
+**Quick reference:**
 - 2 spaces for indentation
 - `snake_case` for methods/variables
 - `CamelCase` for classes
-- Descriptive variable names
-- Keep methods small (<20 lines ideally)
-
-### Design Principles
-
-**KISS (Keep It Simple):**
-```ruby
-# Good - simple path for common case
-if tasks.size <= 300
-  export_simple(tasks)
-else
-  export_chunked(tasks)
-end
-
-# Bad - always complex
-tasks.each_slice(300).to_a.each_with_index do |chunk, i|
-  # Always does chunking even for 5 tasks
-end
-```
-
-**DRY (Don't Repeat Yourself):**
-```ruby
-# Good - extract shared logic
-def sanitize_filename(name)
-  name.gsub(/[^\w\s\-]/, '-').gsub(/\s+/, '-')
-end
-
-# Bad - copy-paste logic
-# ... repeated sanitization in multiple places
-```
-
-**Single Responsibility:**
-```ruby
-# Good - one class, one job
-class GraphClient
-  # Only handles HTTP requests
-end
-
-class TaskRepository
-  # Only handles business logic
-end
-
-# Bad - one class doing everything
-class TaskManager
-  # HTTP, business logic, export, all in one
-end
-```
-
-### Error Handling
-
-```ruby
-# Specific exceptions
-raise AuthenticationError, 'Token expired' if unauthorized
-
-# Don't swallow exceptions
-rescue => e
-  # Bad: silent failure
-  # Good: log and re-raise or handle appropriately
-  warn "Failed to fetch: #{e.message}"
-  raise
-end
-```
+- Follow KISS, DRY, and Single Responsibility principles
+- Use custom exceptions (`AuthenticationError`, `RateLimitError`)
 
 ---
 
 ## Testing Guidelines
 
-### Test Structure
+See **[Testing](DEVELOPER_GUIDE.md#testing)** in the Developer Guide for detailed testing information including:
+- Test structure (unit tests, integration tests with VCR)
+- Test coverage goals
+- VCR cassette recording
+- Debugging with real data
 
-```ruby
-RSpec.describe ExportMsTodo::RecurrenceMapper do
-  subject(:mapper) { described_class.new }
-
-  describe '#map' do
-    context 'with daily pattern' do
-      it 'returns "every day"' do
-        recurrence = { 'pattern' => { 'type' => 'daily', 'interval' => 1 } }
-        expect(mapper.map(recurrence)).to eq('every day')
-      end
-    end
-
-    context 'with unknown pattern' do
-      it 'returns fallback and warns' do
-        recurrence = { 'pattern' => { 'type' => 'unknown' } }
-        expect { mapper.map(recurrence) }.to output(/Unknown/).to_stderr
-      end
-    end
-  end
-end
-```
-
-### Test Coverage
-
-**Critical code paths need 100% coverage:**
-- CSV escaping (data integrity)
-- Recurrence mapping (complex logic)
-- API endpoints (public interface)
-
-**Overall target: 90%+**
-
-### Testing with Real Data
-
-```bash
-# Record VCR cassettes with real token
-export MS_TODO_TOKEN="Bearer REAL_TOKEN"
-bundle exec rspec --tag vcr
-
-# Important: Check cassettes don't contain token
-grep -r "Bearer" spec/fixtures/vcr_cassettes/
-# Should return nothing (VCR filters it)
-```
+**Requirements for contributions:**
+- All new features must include tests
+- Bug fixes must include a test that fails without the fix
+- Aim for 90%+ test coverage on new code
+- Run `bundle exec rspec` before submitting PR
 
 ---
 
 ## Documentation Guidelines
 
-### Markdown Style
-
+- Update relevant docs if your change affects users (README, USER_GUIDE, etc.)
+- Add examples for new features
 - Use ATX-style headers (`#`, `##`, `###`)
-- Include table of contents for long docs
 - Use code fences with language specification
-- Add examples for all features
 
-### Code Comments
-
-```ruby
-# Good - explain WHY, not WHAT
-# Last day of month heuristic (28-31)
-if day >= 28
-  return 'every month on the last day'
-end
-
-# Bad - stating the obvious
-# Set day to 28
-day = 28
-```
+See **[Code Style](DEVELOPER_GUIDE.md#code-style)** for comment guidelines.
 
 ### Commit Messages
 
@@ -480,19 +355,17 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```bash
 # Format: <type>: <description>
 
-# Types:
 feat:     # New feature
 fix:      # Bug fix
 docs:     # Documentation only
 test:     # Adding/updating tests
-refactor: # Code change without adding features or fixing bugs
-chore:    # Maintenance (dependencies, tooling)
+refactor: # Code refactoring
+chore:    # Maintenance
 
 # Examples:
 git commit -m "feat: add reminder date support"
 git commit -m "fix: escape quotes in CSV titles properly"
 git commit -m "docs: add API examples to user guide"
-git commit -m "test: add edge cases for recurrence patterns"
 ```
 
 ---
@@ -535,14 +408,16 @@ Contributors are recognized in:
 
 ## Quick Reference
 
+### Common Commands
+
 | Task | Command |
 |------|---------|
 | Setup | `bundle install` |
 | Run tests | `bundle exec rspec` |
 | Run CLI | `bundle exec bin/export-ms-todo export` |
-| Run API | `bundle exec rackup api/config.ru` |
 | Create branch | `git checkout -b feature/my-feature` |
-| Run specific test | `bundle exec rspec spec/path/to/file_spec.rb:42` |
+
+See **[Developer Guide](DEVELOPER_GUIDE.md)** for complete command reference, architecture details, and debugging tips.
 
 ---
 
