@@ -23,6 +23,8 @@ RSpec/Rails:
 
 RSpecRails/HaveHttpStatus:
   Enabled: false  # Not using Rails, using Sinatra with Rack::Test
+  Exclude:
+    - 'spec/**/*'
 
 Capybara/RSpec/PredicateMatcher:
   Enabled: false
