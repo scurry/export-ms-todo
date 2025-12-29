@@ -1,0 +1,20 @@
+# config/default.yml
+output:
+  format: csv              # csv or json
+  single_file: false       # One CSV per list (in ZIP)
+  path: "./ms-todo-export" # Output path
+
+unmappable_data:
+  reminders: skip          # skip | append_to_description (v2)
+  attachments: skip        # skip | append_to_description (v2)
+
+api:
+  pagination_limit: 100
+  timeout: 30
+
+csv:
+  include_completed: false
+  priority_mapping:
+    low: 4
+    normal: 4
+    high: 1
