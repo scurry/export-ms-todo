@@ -7,6 +7,7 @@ require 'time'
 module ExportMsTodo
   class GraphClient
     include HTTParty
+
     base_uri 'https://graph.microsoft.com/v1.0'
 
     MAX_RETRIES = 3

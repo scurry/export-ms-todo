@@ -13,7 +13,8 @@ module ExportMsTodo
 
       return fallback_mapping unless pattern_type
 
-      method_name = "map_#{pattern_type}"
+      # Convert camelCase pattern type to snake_case for method name
+      method_name = "map_#{pattern_type.gsub(/([a-z])([A-Z])/, '\1_\2').downcase}"
       if respond_to?(method_name, true)
         send(method_name)
       else
@@ -53,7 +54,7 @@ module ExportMsTodo
       base
     end
 
-    def map_absoluteMonthly
+    def map_absolute_monthly
       day = pattern['dayOfMonth']
 
       # Last day of month heuristic (28-31)
@@ -66,7 +67,7 @@ module ExportMsTodo
       interval == 1 ? "every month on the #{day}" : "every #{interval} months on the #{day}"
     end
 
-    def map_relativeMonthly
+    def map_relative_monthly
       index = pattern['index'] # first, second, third, fourth, last
 
       # "Last day of month" (no specific day of week)
@@ -81,12 +82,12 @@ module ExportMsTodo
       "every #{index} #{days}"
     end
 
-    def map_absoluteYearly
+    def map_absolute_yearly
       interval == 1 ? 'every year' : "every #{interval} years"
     end
 
-    def map_relativeYearly
-      map_absoluteYearly
+    def map_relative_yearly
+      map_absolute_yearly
     end
 
     def fallback_mapping

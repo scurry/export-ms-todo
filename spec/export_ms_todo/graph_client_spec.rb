@@ -5,8 +5,9 @@ require 'spec_helper'
 require 'export_ms_todo/graph_client'
 
 RSpec.describe ExportMsTodo::GraphClient do
-  let(:token) { 'Bearer test_token_123' }
   subject(:client) { described_class.new(token) }
+
+  let(:token) { 'Bearer test_token_123' }
 
   describe '#initialize' do
     it 'sets authorization header' do

@@ -10,9 +10,9 @@ RSpec.describe ExportMsTodo::Config do
   describe 'default values' do
     it 'sets sensible defaults' do
       expect(config.output_format).to eq('csv')
-      expect(config.single_file).to eq(false)
+      expect(config.single_file).to be(false)
       expect(config.output_path).to eq('./ms-todo-export')
-      expect(config.include_completed).to eq(false)
+      expect(config.include_completed).to be(false)
     end
   end
 
@@ -31,16 +31,16 @@ RSpec.describe ExportMsTodo::Config do
     end
 
     after do
-      File.delete(config_file) if File.exist?(config_file)
+      FileUtils.rm_f(config_file)
     end
 
     it 'loads configuration from YAML file' do
       config = described_class.new(config_file: config_file)
 
       expect(config.output_format).to eq('json')
-      expect(config.single_file).to eq(true)
+      expect(config.single_file).to be(true)
       expect(config.output_path).to eq('/tmp/export')
-      expect(config.include_completed).to eq(true)
+      expect(config.include_completed).to be(true)
     end
   end
 
@@ -77,7 +77,7 @@ RSpec.describe ExportMsTodo::Config do
     end
 
     after do
-      File.delete(config_file) if File.exist?(config_file)
+      FileUtils.rm_f(config_file)
       ENV.delete('MS_TODO_OUTPUT_PATH')
     end
 

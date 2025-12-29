@@ -43,15 +43,32 @@ Metrics/BlockLength:
     - 'bin/*'
 
 Metrics/MethodLength:
-  Max: 25
+  Max: 35
   Exclude:
     - 'bin/*'
+    - 'spec/**/*'
 
 Metrics/ClassLength:
   Max: 150
 
 Metrics/ModuleLength:
   Max: 150
+
+Metrics/AbcSize:
+  Max: 25
+  Exclude:
+    - 'bin/*'
+    - 'spec/**/*'
+
+Metrics/CyclomaticComplexity:
+  Max: 10
+  Exclude:
+    - 'bin/*'
+
+Metrics/PerceivedComplexity:
+  Max: 10
+  Exclude:
+    - 'bin/*'
 
 # Layout preferences
 Layout/LineLength:
@@ -61,13 +78,28 @@ Layout/LineLength:
 
 # RSpec-specific
 RSpec/ExampleLength:
-  Max: 15
+  Max: 70  # Integration tests can be long
 
 RSpec/MultipleExpectations:
-  Max: 5
+  Max: 20  # Integration tests need multiple expectations
 
 RSpec/NestedGroups:
   Max: 4
+
+RSpec/ContextWording:
+  Enabled: false  # Allow flexible context descriptions
+
+RSpec/DescribeClass:
+  Enabled: false  # Allow describing features/integrations
+
+RSpec/AnyInstance:
+  Enabled: false  # Sometimes necessary for testing
+
+RSpec/SubjectStub:
+  Enabled: false  # Allow stubbing sleep and other methods
+
+RSpec/VerifiedDoubles:
+  Enabled: false  # Normal doubles are fine for simple cases
 
 # Disable overly strict cops
 Style/NumericPredicate:

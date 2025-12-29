@@ -6,8 +6,9 @@ require 'export_ms_todo/task_repository'
 require 'export_ms_todo/graph_client'
 
 RSpec.describe ExportMsTodo::TaskRepository do
-  let(:client) { instance_double(ExportMsTodo::GraphClient) }
   subject(:repo) { described_class.new(client) }
+
+  let(:client) { instance_double(ExportMsTodo::GraphClient) }
 
   describe '#fetch_all_tasks' do
     let(:list_response) do
