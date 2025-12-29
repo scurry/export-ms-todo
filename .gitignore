@@ -1,6 +1,10 @@
 # Example Java project (not part of this Ruby implementation)
 Microsoft-To-Do-Export/
 
+# Git worktrees
+.worktrees/
+worktrees/
+
 # Environment variables
 .env
 
