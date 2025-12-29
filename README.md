@@ -3,7 +3,7 @@
 <div align="center">
 
 ![Ruby](https://img.shields.io/badge/Ruby-3.2+-CC342D?style=flat&logo=ruby&logoColor=white)
-![License](https://img.shields.io/badge/License-GPL%20v3.0-blue.svg)
+![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Status](https://img.shields.io/badge/Status-In%20Development-yellow)
 
 **Export Microsoft To Do tasks to Todoist CSV format**
@@ -230,9 +230,9 @@ bundle exec bin/export-ms-todo export --format json
 
 ## 📄 License
 
-This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
-This ensures the software remains free and open-source.
+This is a permissive license that allows you to use, modify, and distribute the software freely.
 
 ## 🙏 Acknowledgments
 
