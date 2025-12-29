@@ -1,6 +1,6 @@
 # lib/export_ms_todo/exporters/todoist_csv.rb
 require 'csv'
-# require_relative 'task_chunker'
+require_relative 'task_chunker'
 require_relative '../utils'
 
 module ExportMsTodo
@@ -23,9 +23,7 @@ module ExportMsTodo
             single_file_export(list, tasks)
           else
             # Complex path: delegate to specialist
-            # TaskChunker.new(list, tasks, self).export
-            # For now, just use single_file_export (will be replaced with TaskChunker in Task 7)
-            single_file_export(list, tasks)
+            TaskChunker.new(list, tasks, self).export
           end
         end
       end
