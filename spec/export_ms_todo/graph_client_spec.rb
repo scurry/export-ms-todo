@@ -34,11 +34,14 @@ RSpec.describe ExportMsTodo::GraphClient do
         expect { client.get('/me') }.to raise_error(ExportMsTodo::AuthenticationError)
       end
 
-      it 'raises RateLimitError on 429' do
+      it 'raises RateLimitError on 429 after retries' do
         stub_request(:get, /graph.microsoft.com/)
           .to_return(status: 429, headers: { 'Retry-After' => '60' })
 
+        allow(client).to receive(:sleep)
+
         expect { client.get('/me') }.to raise_error(ExportMsTodo::RateLimitError)
+        expect(client).to have_received(:sleep).exactly(3).times
       end
 
       it 'retries on 5xx errors' do
@@ -46,7 +49,10 @@ RSpec.describe ExportMsTodo::GraphClient do
           .to_return(status: 500).then
           .to_return(status: 200, body: '{}')
 
+        allow(client).to receive(:sleep)
+
         expect { client.get('/me') }.not_to raise_error
+        expect(client).to have_received(:sleep).once
       end
     end
   end

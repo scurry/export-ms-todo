@@ -24,7 +24,7 @@ module ExportMsTodo
             single_file_export(list, tasks)
           else
             # Complex path: delegate to specialist
-            TaskChunker.new(list, tasks, self).export
+            TaskChunker.new(list, tasks, self, MAX_TASKS_PER_FILE).export
           end
         end
       end

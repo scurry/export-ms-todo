@@ -4,12 +4,11 @@ require_relative '../utils'
 module ExportMsTodo
   module Exporters
     class TaskChunker
-      MAX_SIZE = 300
-
-      def initialize(list, tasks, exporter)
+      def initialize(list, tasks, exporter, max_size = 300)
         @list = list
         @tasks = tasks
         @exporter = exporter
+        @max_size = max_size
       end
 
       def export
@@ -36,8 +35,8 @@ module ExportMsTodo
           task_size = task.total_task_count
 
           # Edge case: single task exceeds limit
-          if task_size > MAX_SIZE
-            warn "⚠️  Task '#{task.title}' has #{task.subtask_count} subtasks (exceeds 300 limit)"
+          if task_size > @max_size
+            warn "⚠️  Task '#{task.title}' has #{task.subtask_count} subtasks (exceeds #{@max_size} limit)"
 
             # Flush current chunk if not empty
             chunks << current_chunk if current_chunk.any?
@@ -52,7 +51,7 @@ module ExportMsTodo
           end
 
           # Start new chunk if adding this task would exceed limit
-          if current_count + task_size > MAX_SIZE && current_chunk.any?
+          if current_count + task_size > @max_size && current_chunk.any?
             chunks << current_chunk
             current_chunk = []
             current_count = 0

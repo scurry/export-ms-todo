@@ -30,7 +30,13 @@ module ExportMsTodo
         raise AuthenticationError, 'Invalid or expired token'
       when 429
         retry_after = parse_retry_after(response.headers['Retry-After'])
-        raise RateLimitError, "Rate limit exceeded. Retry after #{retry_after} seconds"
+        if retries > 0
+          warn "Rate limit exceeded. Waiting #{retry_after} seconds..."
+          sleep(retry_after)
+          get_with_retry(path, retries - 1)
+        else
+          raise RateLimitError, "Rate limit exceeded. Retry after #{retry_after} seconds"
+        end
       when 500..599
         if retries > 0
           sleep(2 ** (MAX_RETRIES - retries))  # Exponential backoff

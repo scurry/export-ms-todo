@@ -29,40 +29,28 @@ module ExportMsTodo
     end
 
     def fetch_lists
-      fetch_paged_lists('/me/todo/lists')
+      fetch_collection('/me/todo/lists').select do |list|
+        ['none', 'defaultList'].include?(list['wellknownListName'])
+      end
     end
 
     private
 
-    def fetch_paged_lists(url)
+    def fetch_collection(url)
       response = @client.get(url)
       data = JSON.parse(response.body)
-
-      lists = data['value'].select do |list|
-        ['none', 'defaultList'].include?(list['wellknownListName'])
-      end
+      items = data['value'] || []
 
       if data['@odata.nextLink']
-        lists + fetch_paged_lists(data['@odata.nextLink'])
+        items + fetch_collection(data['@odata.nextLink'])
       else
-        lists
+        items
       end
     end
 
-    def fetch_tasks_for_list(list_id, skip = 0)
-      url = "/me/todo/lists/#{list_id}/tasks"
-      url += "?$skip=#{skip}" if skip > 0
-
-      response = @client.get(url)
-      data = JSON.parse(response.body)
-
-      tasks = data['value'].select { |t| t['status'] != 'completed' }
-
-      if data['@odata.nextLink']
-        next_skip = data['@odata.nextLink'].match(/\$skip=(\d+)/)[1].to_i
-        tasks + fetch_tasks_for_list(list_id, next_skip)
-      else
-        tasks
+    def fetch_tasks_for_list(list_id)
+      fetch_collection("/me/todo/lists/#{list_id}/tasks").select do |t|
+        t['status'] != 'completed'
       end
     end
 
@@ -71,8 +59,17 @@ module ExportMsTodo
       response = @client.get(url)
       data = JSON.parse(response.body)
       data['value'] || []
-    rescue
-      []
+    rescue ExportMsTodo::Error => e
+      # Re-raise critical errors
+      raise e if e.is_a?(AuthenticationError) || e.is_a?(RateLimitError)
+
+      # Handle 404 (Task not found) gracefully
+      if e.message.include?('404')
+        warn "⚠️  Task #{task_id} not found when fetching checklist (skipping checklist)"
+        return []
+      end
+
+      raise e
     end
   end
 end
