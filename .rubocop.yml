@@ -10,24 +10,20 @@ AllCops:
     - 'tmp/**/*'
     - 'spec/fixtures/**/*'
 
-# Disable Capybara and FactoryBot cops (not used in this project)
-# These are loaded as dependencies of rubocop-rspec but aren't applicable
-RSpec/Capybara:
-  Enabled: false
-
-RSpec/FactoryBot:
-  Enabled: false
-
-RSpec/Rails:
-  Enabled: false
-
-RSpecRails/HaveHttpStatus:
-  Enabled: false  # Not using Rails, using Sinatra with Rack::Test
+# Disable extension departments not applicable to this project (uses Sinatra, not Rails)
+# rubocop-rspec automatically loads these as dependencies, but they're not relevant
+# Note: Department-level "Enabled: false" doesn't work, so we exclude all files
+Capybara:
   Exclude:
-    - 'spec/**/*'
+    - '**/*'
 
-Capybara/RSpec/PredicateMatcher:
-  Enabled: false
+FactoryBot:
+  Exclude:
+    - '**/*'
+
+RSpecRails:
+  Exclude:
+    - '**/*'
 
 # Style preferences aligned with existing codebase
 Style/StringLiterals:
