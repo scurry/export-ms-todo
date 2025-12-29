@@ -72,7 +72,7 @@ Export MS Todo follows these core principles:
 
 **Exporters**
 - `TodoistCSV` - CSV generation with escaping
-- `TaskChunker` - Handles >300 task lists (KISS principle)
+- `TaskChunker` - Handles >300 task lists
 - `JSON` - Debug export format
 
 ---
@@ -117,7 +117,7 @@ bundle exec rspec
 bundle exec bin/export-ms-todo version
 ```
 
-### Development Workflow with Worktrees
+### Development Workflow for coding agents (e.g. claude) with Worktrees
 
 For feature development, use git worktrees for isolation:
 

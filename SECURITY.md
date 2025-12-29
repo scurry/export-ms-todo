@@ -17,7 +17,7 @@ We take the security of this project seriously. If you have discovered a securit
 ### Process
 
 1.  **Do not** open a public issue on GitHub.
-2.  Please email the maintainers at [INSERT EMAIL ADDRESS] or report it via [INSERT PRIVATE REPORTING CHANNEL].
+2.  Please email the maintainers at info@scottcurry.com or report it via www.granite-hq.com/contact .
 3.  Include as much information as possible to help us reproduce the issue.
 4.  We will acknowledge your report within 48 hours.
 5.  We will investigate the issue and communicate our findings and a timeline for a fix.
