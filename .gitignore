@@ -1,0 +1,29 @@
+# Example Java project (not part of this Ruby implementation)
+Microsoft-To-Do-Export/
+
+# Environment variables
+.env
+
+# Output files
+*.zip
+*.csv
+*.json
+
+# Ruby
+*.gem
+.bundle/
+vendor/bundle/
+.rspec_status
+coverage/
+.byebug_history
+.pry_history
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
