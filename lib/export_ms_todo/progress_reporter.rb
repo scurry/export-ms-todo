@@ -6,7 +6,7 @@ module ExportMsTodo
   class ProgressReporter
     attr_reader :total_tasks_in_ms, :exported_count, :completed_skipped, :failed_count
 
-    def initialize(verbose: false, output:)
+    def initialize(output:, verbose: false)
       @verbose = verbose
       @output = output # Thor instance for colored output
 
@@ -86,9 +86,7 @@ module ExportMsTodo
     def failed_task(task_id, error)
       @failed_count += 1
 
-      if @current_list && @list_stats[@current_list]
-        @list_stats[@current_list][:failed] += 1
-      end
+      @list_stats[@current_list][:failed] += 1 if @current_list && @list_stats[@current_list]
 
       return unless @verbose
 
@@ -101,33 +99,11 @@ module ExportMsTodo
 
       duration = format_duration(Time.now - @start_time)
 
-      @output.say "\n" + '━' * 50
-      @output.say 'Export Summary'
-      @output.say '━' * 50 + "\n"
-
-      @output.say "Total tasks in MS Todo:     #{@total_tasks_in_ms}"
-      @output.say "  ✓ Exported:               #{@exported_count}", :green
-      @output.say "  ⊘ Completed (skipped):     #{@completed_skipped}", :yellow if @completed_skipped.positive?
-      @output.say "  ✗ Failed:                   #{@failed_count}", :red if @failed_count.positive?
-
-      # Per-list breakdown
-      if @list_stats.any?
-        @output.say "\nBreakdown by list:"
-        @list_stats.each do |list_name, stats|
-          summary = "#{stats[:exported]} exported"
-          summary += ", #{stats[:completed]} completed" if stats[:completed].positive?
-          summary += ", #{stats[:failed]} failed" if stats[:failed].positive?
-          @output.say "  #{list_name}: #{summary}"
-        end
-      end
-
+      print_summary_header
+      print_task_counts
+      print_list_breakdown
       @output.say "\nDuration: #{duration}"
-
-      # Warning if failures
-      return unless @failed_count.positive?
-
-      @output.say "\n⚠️  Note: #{@failed_count} tasks failed to export", :yellow
-      @output.say 'Run with --verbose to see error details' unless @verbose
+      print_failure_warning
     end
 
     def increment_total_tasks(count = 1)
@@ -147,6 +123,43 @@ module ExportMsTodo
     end
 
     private
+
+    def print_summary_header
+      @output.say "\n#{'━' * 50}"
+      @output.say 'Export Summary'
+      @output.say "#{'━' * 50}\n"
+    end
+
+    def print_task_counts
+      @output.say "Total tasks in MS Todo:     #{@total_tasks_in_ms}"
+      @output.say "  ✓ Exported:               #{@exported_count}", :green
+      @output.say "  ⊘ Completed (skipped):     #{@completed_skipped}", :yellow if @completed_skipped.positive?
+      @output.say "  ✗ Failed:                   #{@failed_count}", :red if @failed_count.positive?
+    end
+
+    def print_list_breakdown
+      return unless @list_stats.any?
+
+      @output.say "\nBreakdown by list:"
+      @list_stats.each do |list_name, stats|
+        summary = format_list_summary(stats)
+        @output.say "  #{list_name}: #{summary}"
+      end
+    end
+
+    def format_list_summary(stats)
+      summary = "#{stats[:exported]} exported"
+      summary += ", #{stats[:completed]} completed" if stats[:completed].positive?
+      summary += ", #{stats[:failed]} failed" if stats[:failed].positive?
+      summary
+    end
+
+    def print_failure_warning
+      return unless @failed_count.positive?
+
+      @output.say "\n⚠️  Note: #{@failed_count} tasks failed to export", :yellow
+      @output.say 'Run with --verbose to see error details' unless @verbose
+    end
 
     def format_duration(seconds)
       return "#{seconds.round}s" if seconds < 60
