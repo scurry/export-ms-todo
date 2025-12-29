@@ -28,8 +28,8 @@ RSpec.describe ExportMsTodo::TaskRepository do
     end
 
     before do
-      allow(client).to receive(:get).with('/me/todo/lists').and_return(list_response)
-      allow(client).to receive(:get).with('/me/todo/lists/list1/tasks').and_return(tasks_response)
+      allow(client).to receive(:get).with('/me/todo/lists?$top=100').and_return(list_response)
+      allow(client).to receive(:get).with("/me/todo/lists/list1/tasks?$top=100&$filter=status%20ne%20'completed'").and_return(tasks_response)
       allow(client).to receive(:get).with(%r{/checklistItems$}).and_return(checklist_response)
     end
 

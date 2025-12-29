@@ -13,6 +13,7 @@ require_relative '../lib/export_ms_todo/task_repository'
 require_relative '../lib/export_ms_todo/config'
 require_relative '../lib/export_ms_todo/exporters/todoist_csv'
 require_relative '../lib/export_ms_todo/exporters/json'
+require_relative '../lib/export_ms_todo/progress_reporter'
 
 module ExportMsTodo
   class CLI < Thor
@@ -27,6 +28,7 @@ module ExportMsTodo
     option :format, aliases: '-f', enum: %w[csv json], default: 'csv', desc: 'Output format'
     option :single_file, type: :boolean, default: false, desc: 'Export all lists to single file'
     option :token, aliases: '-t', desc: 'MS Graph access token'
+    option :verbose, type: :boolean, default: false, desc: 'Show detailed progress'
     def export
       trap('SIGINT') do
         say "\n\n❌ Export cancelled by user.", :red
@@ -48,14 +50,18 @@ module ExportMsTodo
 
       token = config.token || prompt_for_token
 
+      # Create progress reporter
+      reporter = ProgressReporter.new(verbose: options[:verbose], output: self)
+
       client = GraphClient.new(token)
-      repo = TaskRepository.new(client)
+      repo = TaskRepository.new(client, reporter: reporter)
 
       say '✓ Authenticated successfully', :green
-      say '✓ Fetching tasks...', :green
 
-      # Fetch tasks
+      # Fetch tasks with progress reporting
+      reporter.start_export
       grouped_tasks = repo.fetch_all_tasks
+      reporter.finish_export
 
       if grouped_tasks.empty?
         say 'No lists found.', :yellow
@@ -98,8 +104,11 @@ module ExportMsTodo
         end
       end
 
-      say "\nExport complete!", :green
+      say "\n✓ Export complete!", :green
       say "📦 #{File.basename(output_path)}"
+
+      # Print summary
+      reporter.print_summary
 
       # Show chunked file warnings
       chunked_lists = files.select { |f| f[:total_parts] && f[:total_parts] > 1 }

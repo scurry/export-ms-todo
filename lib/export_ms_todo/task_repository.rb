@@ -3,27 +3,35 @@
 # lib/export_ms_todo/task_repository.rb
 require 'json'
 require_relative 'task'
+require_relative 'null_reporter'
 
 module ExportMsTodo
   class TaskRepository
-    def initialize(client)
+    def initialize(client, reporter: nil)
       @client = client
+      @reporter = reporter || NullReporter.new
     end
 
     def fetch_all_tasks
       lists = fetch_lists
+      @reporter.start_fetching(lists.size)
 
-      lists.map do |list|
+      lists.map.with_index do |list, idx|
+        @reporter.fetching_list(list['displayName'], idx + 1, lists.size)
+
         tasks_data = fetch_tasks_for_list(list['id'])
 
         tasks = tasks_data.map do |task_data|
           checklist = fetch_checklist_items(list['id'], task_data['id'])
 
-          Task.new(task_data.merge(
-                     'checklistItems' => checklist,
-                     'listName' => list['displayName'],
-                     'listId' => list['id']
-                   ))
+          task = Task.new(task_data.merge(
+                            'checklistItems' => checklist,
+                            'listName' => list['displayName'],
+                            'listId' => list['id']
+                          ))
+
+          @reporter.fetched_task(task, list['displayName'])
+          task
         end
 
         { list: list, tasks: tasks }
@@ -31,7 +39,7 @@ module ExportMsTodo
     end
 
     def fetch_lists
-      fetch_collection('/me/todo/lists').select do |list|
+      fetch_collection('/me/todo/lists?$top=100').select do |list|
         %w[none defaultList].include?(list['wellknownListName'])
       end
     end
@@ -51,9 +59,8 @@ module ExportMsTodo
     end
 
     def fetch_tasks_for_list(list_id)
-      fetch_collection("/me/todo/lists/#{list_id}/tasks").reject do |t|
-        t['status'] == 'completed'
-      end
+      # optimized with server-side filtering and larger page size
+      fetch_collection("/me/todo/lists/#{list_id}/tasks?$top=100&$filter=status%20ne%20'completed'")
     end
 
     def fetch_checklist_items(list_id, task_id)
@@ -67,7 +74,7 @@ module ExportMsTodo
 
       # Handle 404 (Task not found) gracefully
       if e.message.include?('404')
-        warn "⚠️  Task #{task_id} not found when fetching checklist (skipping checklist)"
+        @reporter.failed_task(task_id, e)
         return []
       end
 

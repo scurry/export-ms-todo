@@ -62,8 +62,8 @@ RSpec.describe 'Full export flow', :integration do
 
       # Set up mocks
       client = ExportMsTodo::GraphClient.new(token)
-      allow(client).to receive(:get).with('/me/todo/lists').and_return(lists_response)
-      allow(client).to receive(:get).with('/me/todo/lists/list-1/tasks').and_return(tasks_response)
+      allow(client).to receive(:get).with('/me/todo/lists?$top=100').and_return(lists_response)
+      allow(client).to receive(:get).with("/me/todo/lists/list-1/tasks?$top=100&$filter=status%20ne%20'completed'").and_return(tasks_response)
       allow(client).to receive(:get).with(/checklistItems/).and_return(checklist_response)
 
       # Execute the flow
@@ -131,8 +131,8 @@ RSpec.describe 'Full export flow', :integration do
       checklist_response = double(body: { 'value' => [] }.to_json)
 
       client = ExportMsTodo::GraphClient.new(token)
-      allow(client).to receive(:get).with('/me/todo/lists').and_return(lists_response)
-      allow(client).to receive(:get).with('/me/todo/lists/list-1/tasks').and_return(tasks_response)
+      allow(client).to receive(:get).with('/me/todo/lists?$top=100').and_return(lists_response)
+      allow(client).to receive(:get).with("/me/todo/lists/list-1/tasks?$top=100&$filter=status%20ne%20'completed'").and_return(tasks_response)
       allow(client).to receive(:get).with(/checklistItems/).and_return(checklist_response)
 
       repo = ExportMsTodo::TaskRepository.new(client)
