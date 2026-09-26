@@ -8,7 +8,7 @@ ruby '~> 3.4'
 gem 'dotenv', '~> 3.0'
 gem 'httparty', '~> 0.21'
 gem 'puma', '~> 7.2'
-gem 'rubyzip', '~> 2.3'
+gem 'rubyzip', '~> 3.4'
 gem 'sinatra', '~> 4.0'
 gem 'thor', '~> 1.3'
 
